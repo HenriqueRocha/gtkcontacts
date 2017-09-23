@@ -6,6 +6,8 @@ the book ***Mono - A Developer's Notebook*** by Edd Dumbill and Niel M. Bornstei
 
 All the code was written with [*nvi*](https://en.wikipedia.org/wiki/Nvi).
 
+[![contacts.png](https://s26.postimg.org/56zi6sgix/contacts.png)](https://postimg.org/image/fh1x616ed/)
+
 License
 -------
 

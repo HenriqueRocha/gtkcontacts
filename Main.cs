@@ -8,6 +8,7 @@ class MainClass {
 	private static Entry emailEntry;
 	private static Entry tagsEntry;
 	private static Button saveButton;
+	private static ListStore store;
 
 	private static ContactList contactList;
 
@@ -100,6 +101,37 @@ class MainClass {
 		v.PackStart (emailEntry, true, true, 0);
 		v.PackStart (tagsEntry, true, true, 0);
 
+		TreeView tv = new TreeView();
+		tv.HeadersVisible = true;
+		outerv.Add(tv);
+
+		TreeViewColumn col = new TreeViewColumn();
+		CellRenderer colr = new CellRendererText();
+		col.Title = "Name";
+		col.PackStart(colr, true);
+		col.AddAttribute(colr, "text", 0);
+		tv.AppendColumn(col);
+
+		col = new TreeViewColumn();
+		colr = new CellRendererText();
+		col.Title = "E-mail";
+		col.PackStart(colr, true);
+		col.AddAttribute(colr, "text", 1);
+		tv.AppendColumn(col);
+
+		col = new TreeViewColumn();
+		colr = new CellRendererText();
+		col.Title = "Tags";
+		col.PackStart(colr, true);
+		col.AddAttribute(colr, "text", 2);
+		tv.AppendColumn(col);	
+		
+		store = new ListStore(typeof(string), typeof(string), typeof(string));
+		tv.Model = store;
+
+		foreach (Contact contact in contactList) {
+			store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
+		}
 		saveButton = new Button ("Save");
 		saveButton.Sensitive = false;
 		saveButton.Clicked += new EventHandler (Button_Clicked);
@@ -170,11 +202,11 @@ class MainClass {
 		firstnameEntry.Text = "";
 		emailEntry.Text = "";
 		tagsEntry.Text = "";
+		store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
 	}
 
 	static void Name_Changed(object o, EventArgs args) {
 		saveButton.Sensitive = !string.IsNullOrEmpty(firstnameEntry.Text);
 	}
-
 }
 

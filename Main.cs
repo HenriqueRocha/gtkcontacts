@@ -22,11 +22,13 @@ class MainClass {
 		try {
 			contactList = new ContactList();
 			using (StreamReader reader = File.OpenText(FILENAME)) {
-				string contactLine = reader.ReadLine();
-				string[] split = contactLine.Split(',');
-				Contact contact = new Contact(
-					split[0], split[1], split[2]);
-				contactList.Add(contact);
+				string line = null;
+				while ((line = reader.ReadLine()) != null) {
+					string[] split = line.Split(',');
+					Contact contact = new Contact(
+						split[0], split[1], split[2]);
+					contactList.Add(contact);
+				}
 			} 
 		} catch (IndexOutOfRangeException e) {
 			Console.Error.WriteLine("No filename specified.");

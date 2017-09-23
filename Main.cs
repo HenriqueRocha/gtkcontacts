@@ -1,24 +1,53 @@
 using System;
+using System.IO;
 using Gtk;
 
 class MainClass {
+	private static string FILENAME = "CONTACTS";
 	private static Entry firstnameEntry;
 	private static Entry emailEntry;
 	private static Entry tagsEntry;
+	private static Button saveButton;
 
-	public static void Main (string[] args)
-	{
+	private static ContactList contactList;
+
+	public static void Main (string[] args) {
+		ReadDataFile(args);
 		Application.Init();
 		SetUpGui ();
 		Application.Run ();
 	}
 
-	static void SetUpGui ()
-	{
+	static void ReadDataFile(string[] args) {
+		try {
+			contactList = new ContactList();
+			using (StreamReader reader = File.OpenText(FILENAME)) {
+				string contactLine = reader.ReadLine();
+				string[] split = contactLine.Split(',');
+				Contact contact = new Contact(
+					split[0], split[1], split[2]);
+				contactList.Add(contact);
+			} 
+		} catch (IndexOutOfRangeException e) {
+			Console.Error.WriteLine("No filename specified.");
+			Environment.Exit(1);
+		} catch (FileNotFoundException e) {
+			Console.Error.WriteLine("File \"{0}\" does not exist.",
+				FILENAME);
+			Environment.Exit(2);
+		} catch (Exception e) {
+			Console.Error.WriteLine(e);
+			Environment.Exit(3);
+		}
+
+	}
+
+	static void SetUpGui () {
 		Window w = new Window ("Contacts#");
 		w.DeleteEvent += Window_Delete;
 
 		firstnameEntry = new Entry();
+		firstnameEntry.Changed += Name_Changed;
 		emailEntry = new Entry();
 		tagsEntry = new Entry();
 
@@ -69,9 +98,10 @@ class MainClass {
 		v.PackStart (emailEntry, true, true, 0);
 		v.PackStart (tagsEntry, true, true, 0);
 
-		Button b = new Button ("Save");
-		b.Clicked += new EventHandler (Button_Clicked);
-		outerv.PackStart(b, false, false, 0);
+		saveButton = new Button ("Save");
+		saveButton.Sensitive = false;
+		saveButton.Clicked += new EventHandler (Button_Clicked);
+		outerv.PackStart(saveButton, false, false, 0);
 
 		w.ShowAll ();
 	}
@@ -106,25 +136,43 @@ class MainClass {
 		return mb;
 	}
 
-	public static void About_Activated(object o, EventArgs e)
-	{
+	static void SaveContacts() {
+		using (StreamWriter writer = File.CreateText(FILENAME)) {
+			foreach (Contact contact in contactList) {
+				writer.WriteLine(contact);	
+			}
+		} 
+	}
+
+	public static void About_Activated(object o, EventArgs e) {
 		System.Console.WriteLine("About");
 	}
 
-	public static void Quit_Activated(object o, EventArgs e)
-	{
+	public static void Quit_Activated(object o, EventArgs e) {
+		SaveContacts();
 		Application.Quit();
 	}
 
-	static void Window_Delete (object o, DeleteEventArgs args)
-	{
+	static void Window_Delete (object o, DeleteEventArgs args) {
+		SaveContacts();
 		Application.Quit ();
 		args.RetVal = true;
 	}
 
-	static void Button_Clicked (object o, EventArgs args)
-	{
-		System.Console.WriteLine ("Hello, World!");
+	static void Button_Clicked (object o, EventArgs args) {
+		string name = firstnameEntry.Text;
+		string email = emailEntry.Text;
+		string tags = tagsEntry.Text;
+		Contact contact = new Contact(name, email, tags);
+		contactList.Add(contact);
+		firstnameEntry.Text = "";
+		emailEntry.Text = "";
+		tagsEntry.Text = "";
 	}
+
+	static void Name_Changed(object o, EventArgs args) {
+		saveButton.Sensitive = !string.IsNullOrEmpty(firstnameEntry.Text);
+	}
+
 }
 

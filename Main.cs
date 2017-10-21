@@ -20,6 +20,11 @@ class MainClass {
 	}
 
 	static void ReadDataFile(string[] args) {
+		if (!File.Exists(FILENAME))
+		{
+			using (TextWriter writer = File.CreateText(FILENAME)) { }
+		}
+			
 		try {
 			contactList = new ContactList();
 			using (StreamReader reader = File.OpenText(FILENAME)) {

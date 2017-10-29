@@ -4,20 +4,32 @@ using Gtk;
 
 namespace ContactsSharp
 {
-	class GtkContactsView
+	class GtkContactsView : ContactsView
 	{
 		private Entry firstnameEntry;
 		private Entry emailEntry;
 		private Entry tagsEntry;
 		private Button saveButton;
 		private ListStore store;
-
-		ContactsRepository repository;
-
-		public GtkContactsView(ContactsRepository repository)
+		private ContactsPresenter presenter;
+		public void setPresenter(ContactsPresenter presenter)
 		{
-			this.repository = repository;
+			this.presenter = presenter;
+		}
+
+		public void Init()
+		{
 			SetUpGui();
+			presenter.OnViewInitialized();
+		}
+
+		public void ShowContacts(ContactList contactList)
+		{
+			for (int i = 0; i < contactList.Size(); i++)
+			{
+				Contact contact = contactList.Get(i);
+				store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
+			}
 		}
 
 		void SetUpGui()
@@ -105,12 +117,6 @@ namespace ContactsSharp
 			store = new ListStore(typeof(string), typeof(string), typeof(string));
 			tv.Model = store;
 
-			ContactList contactList = repository.getContacts();
-			for (int i = 0; i < contactList.Size(); i++)
-			{
-				Contact contact = contactList.Get(i);
-				store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
-			}
 			saveButton = new Button("Save");
 			saveButton.Sensitive = false;
 			saveButton.Clicked += new EventHandler(Button_Clicked);
@@ -156,13 +162,13 @@ namespace ContactsSharp
 
 		void Quit_Activated(object o, EventArgs e)
 		{
-			repository.Save();
+			presenter.OnQuitActivated();
 			Application.Quit();
 		}
 
 		void Window_Delete(object o, DeleteEventArgs args)
 		{
-			repository.Save();
+			presenter.OnQuitActivated();
 			Application.Quit();
 			args.RetVal = true;
 		}
@@ -173,7 +179,7 @@ namespace ContactsSharp
 			string email = emailEntry.Text;
 			string tags = tagsEntry.Text;
 			Contact contact = new Contact(name, email, tags);
-			repository.Add(contact);
+			presenter.OnSaveClicked(contact);
 			firstnameEntry.Text = "";
 			emailEntry.Text = "";
 			tagsEntry.Text = "";

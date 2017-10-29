@@ -6,14 +6,15 @@ namespace ContactsSharp
 	class MainClass
 	{
 		private static string FILENAME = "CONTACTS";
-		private static ContactsRepository repository;
-		private static GtkContactsView view;
 
 		public static void Main(string[] args)
 		{
 			Application.Init();
-			repository = new ContactsRepositoryImpl(FILENAME);
-			view = new GtkContactsView(repository);
+			ContactsRepository repository = new ContactsRepositoryImpl(FILENAME);
+			ContactsView view = new GtkContactsView();
+			ContactsPresenter presenter = new ContactsPresenter(view, repository);
+			view.setPresenter(presenter);
+			view.Init();
 			Application.Run();
 		}
 	}

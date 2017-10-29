@@ -34,6 +34,8 @@
     <Compile Include="Data\ContactListTest.cs" />
     <Compile Include="Data\ContactsRepository.cs" />
     <Compile Include="GtkContactsView.cs" />
+    <Compile Include="ContactsView.cs" />
+    <Compile Include="ContactsPresenter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />

@@ -134,7 +134,8 @@ class MainClass {
 		store = new ListStore(typeof(string), typeof(string), typeof(string));
 		tv.Model = store;
 
-		foreach (Contact contact in contactList) {
+		for (int i = 0; i < contactList.Size(); i++) {
+			Contact contact = contactList.Get(i);
 			store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
 		}
 		saveButton = new Button ("Save");
@@ -177,7 +178,8 @@ class MainClass {
 
 	static void SaveContacts() {
 		using (StreamWriter writer = File.CreateText(FILENAME)) {
-			foreach (Contact contact in contactList) {
+			for (int i = 0; i < contactList.Size(); i++) {
+				Contact contact = contactList.Get(i);
 				writer.WriteLine(contact);	
 			}
 		} 

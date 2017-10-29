@@ -28,9 +28,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
-    <Compile Include="ContactList.cs" />
-    <Compile Include="Contact.cs" />
-    <Compile Include="ContactListTest.cs" />
+    <Compile Include="Data\ContactsRepositoryImpl.cs" />
+    <Compile Include="Data\Contact.cs" />
+    <Compile Include="Data\ContactList.cs" />
+    <Compile Include="Data\ContactListTest.cs" />
+    <Compile Include="Data\ContactsRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
@@ -41,6 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

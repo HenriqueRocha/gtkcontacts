@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using ContactsSharp.Data;
 using Gtk;
 
-class MainClass {
+class MainClass
+{
 	private static string FILENAME = "CONTACTS";
 	private static Entry firstnameEntry;
 	private static Entry emailEntry;
@@ -10,48 +12,19 @@ class MainClass {
 	private static Button saveButton;
 	private static ListStore store;
 
-	private static ContactList contactList;
+	private static ContactsRepository repository;
 
-	public static void Main (string[] args) {
-		ReadDataFile(args);
+	public static void Main(string[] args)
+	{
 		Application.Init();
-		SetUpGui ();
-		Application.Run ();
+		repository = new ContactsRepositoryImpl(FILENAME);
+		SetUpGui();
+		Application.Run();
 	}
 
-	static void ReadDataFile(string[] args) {
-		if (!File.Exists(FILENAME))
-		{
-			using (TextWriter writer = File.CreateText(FILENAME)) { }
-		}
-			
-		try {
-			contactList = new ContactList();
-			using (StreamReader reader = File.OpenText(FILENAME)) {
-				string line = null;
-				while ((line = reader.ReadLine()) != null) {
-					string[] split = line.Split(',');
-					Contact contact = new Contact(
-						split[0], split[1], split[2]);
-					contactList.Add(contact);
-				}
-			} 
-		} catch (IndexOutOfRangeException e) {
-			Console.Error.WriteLine("No filename specified.");
-			Environment.Exit(1);
-		} catch (FileNotFoundException e) {
-			Console.Error.WriteLine("File \"{0}\" does not exist.",
-				FILENAME);
-			Environment.Exit(2);
-		} catch (Exception e) {
-			Console.Error.WriteLine(e);
-			Environment.Exit(3);
-		}
-
-	}
-
-	static void SetUpGui () {
-		Window w = new Window ("Contacts#");
+	static void SetUpGui()
+	{
+		Window w = new Window("Contacts#");
 		w.DeleteEvent += Window_Delete;
 
 		firstnameEntry = new Entry();
@@ -75,7 +48,7 @@ class MainClass {
 		l.UseMarkup = true;
 		outerv.PackStart(l, false, false, 0);
 
-		HBox h = new HBox ();
+		HBox h = new HBox();
 		h.Spacing = 6;
 		outerv.Add(h);
 
@@ -83,14 +56,14 @@ class MainClass {
 		v.Spacing = 6;
 		h.PackStart(v, false, false, 0);
 
-		l = new Label ("Full name: ");
+		l = new Label("Full name: ");
 		l.Xalign = 0;
-		v.PackStart (l, true, false, 0);
+		v.PackStart(l, true, false, 0);
 		l.MnemonicWidget = firstnameEntry;
 
-		l = new Label ("Email address: ");
+		l = new Label("Email address: ");
 		l.Xalign = 0;
-		v.PackStart (l, true, false, 0);
+		v.PackStart(l, true, false, 0);
 		l.MnemonicWidget = emailEntry;
 
 		l = new Label("Tags: ");
@@ -98,13 +71,13 @@ class MainClass {
 		v.PackStart(l, true, true, 0);
 		l.MnemonicWidget = tagsEntry;
 
-		v = new VBox ();
+		v = new VBox();
 		v.Spacing = 6;
-		h.PackStart (v, true, true, 0);
+		h.PackStart(v, true, true, 0);
 
-		v.PackStart (firstnameEntry, true, true, 0);
-		v.PackStart (emailEntry, true, true, 0);
-		v.PackStart (tagsEntry, true, true, 0);
+		v.PackStart(firstnameEntry, true, true, 0);
+		v.PackStart(emailEntry, true, true, 0);
+		v.PackStart(tagsEntry, true, true, 0);
 
 		TreeView tv = new TreeView();
 		tv.HeadersVisible = true;
@@ -129,21 +102,23 @@ class MainClass {
 		col.Title = "Tags";
 		col.PackStart(colr, true);
 		col.AddAttribute(colr, "text", 2);
-		tv.AppendColumn(col);	
-		
+		tv.AppendColumn(col);
+
 		store = new ListStore(typeof(string), typeof(string), typeof(string));
 		tv.Model = store;
 
-		for (int i = 0; i < contactList.Size(); i++) {
+		ContactList contactList = repository.getContacts();
+		for (int i = 0; i < contactList.Size(); i++)
+		{
 			Contact contact = contactList.Get(i);
 			store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
 		}
-		saveButton = new Button ("Save");
+		saveButton = new Button("Save");
 		saveButton.Sensitive = false;
-		saveButton.Clicked += new EventHandler (Button_Clicked);
+		saveButton.Clicked += new EventHandler(Button_Clicked);
 		outerv.PackStart(saveButton, false, false, 0);
 
-		w.ShowAll ();
+		w.ShowAll();
 	}
 
 	static MenuBar createMenuBar(Window w)
@@ -169,50 +144,46 @@ class MainClass {
 		item.Submenu = helpMenu;
 		mb.Append(item);
 
-		item = new MenuItem("_About");	
+		item = new MenuItem("_About");
 		item.Activated += About_Activated;
 		helpMenu.Append(item);
 
 		return mb;
 	}
 
-	static void SaveContacts() {
-		using (StreamWriter writer = File.CreateText(FILENAME)) {
-			for (int i = 0; i < contactList.Size(); i++) {
-				Contact contact = contactList.Get(i);
-				writer.WriteLine(contact);	
-			}
-		} 
-	}
-
-	public static void About_Activated(object o, EventArgs e) {
+	public static void About_Activated(object o, EventArgs e)
+	{
 		System.Console.WriteLine("About");
 	}
 
-	public static void Quit_Activated(object o, EventArgs e) {
-		SaveContacts();
+	public static void Quit_Activated(object o, EventArgs e)
+	{
+		repository.Save();
 		Application.Quit();
 	}
 
-	static void Window_Delete (object o, DeleteEventArgs args) {
-		SaveContacts();
-		Application.Quit ();
+	static void Window_Delete(object o, DeleteEventArgs args)
+	{
+		repository.Save();
+		Application.Quit();
 		args.RetVal = true;
 	}
 
-	static void Button_Clicked (object o, EventArgs args) {
+	static void Button_Clicked(object o, EventArgs args)
+	{
 		string name = firstnameEntry.Text;
 		string email = emailEntry.Text;
 		string tags = tagsEntry.Text;
 		Contact contact = new Contact(name, email, tags);
-		contactList.Add(contact);
+		repository.Add(contact);
 		firstnameEntry.Text = "";
 		emailEntry.Text = "";
 		tagsEntry.Text = "";
 		store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
 	}
 
-	static void Name_Changed(object o, EventArgs args) {
+	static void Name_Changed(object o, EventArgs args)
+	{
 		saveButton.Sensitive = !string.IsNullOrEmpty(firstnameEntry.Text);
 	}
 }

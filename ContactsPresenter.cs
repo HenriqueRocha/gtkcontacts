@@ -22,6 +22,7 @@ namespace ContactsSharp
 		public void OnSaveClicked(Contact contact)
 		{
 			repository.Add(contact);	
+			view.ShowSavedContact(contact);
 		}
 
 		public void OnQuitActivated()

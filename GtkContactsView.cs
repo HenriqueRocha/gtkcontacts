@@ -32,6 +32,14 @@ namespace ContactsSharp
 			}
 		}
 
+		public void ShowSavedContact(Contact contact)
+		{
+			firstnameEntry.Text = "";
+			emailEntry.Text = "";
+			tagsEntry.Text = "";
+			store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
+		}
+
 		void SetUpGui()
 		{
 			Window w = new Window("Contacts#");
@@ -180,10 +188,6 @@ namespace ContactsSharp
 			string tags = tagsEntry.Text;
 			Contact contact = new Contact(name, email, tags);
 			presenter.OnSaveClicked(contact);
-			firstnameEntry.Text = "";
-			emailEntry.Text = "";
-			tagsEntry.Text = "";
-			store.AppendValues(contact.Fullname, contact.Email, contact.Tags);
 		}
 
 		void Name_Changed(object o, EventArgs args)

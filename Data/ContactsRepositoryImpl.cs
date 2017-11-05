@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Xml;
 
 namespace ContactsSharp.Data
 {
@@ -26,13 +27,21 @@ namespace ContactsSharp.Data
 
 		public void Save()
 		{
-			using (StreamWriter writer = File.CreateText(filename))
-			{
+			using (XmlTextWriter xmlTextWriter = new XmlTextWriter(File.CreateText(filename))) {
+				xmlTextWriter.Formatting = Formatting.Indented;
+				xmlTextWriter.Indentation = 2;
+				xmlTextWriter.IndentChar = ' ';
+				xmlTextWriter.WriteStartElement("contacts");
 				for (int i = 0; i < contactList.Size(); i++)
 				{
 					Contact c = contactList.Get(i);
-					writer.WriteLine(c);
+					xmlTextWriter.WriteStartElement("contact");
+					xmlTextWriter.WriteElementString("name", c.Fullname);
+					xmlTextWriter.WriteElementString("email", c.Email);
+					xmlTextWriter.WriteElementString("tags", c.Tags);
+					xmlTextWriter.WriteEndElement();
 				}
+				xmlTextWriter.WriteEndElement();
 			}
 		}
 
